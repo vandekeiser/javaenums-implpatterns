@@ -2,6 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+  <!--You need to set the JAVA_1_8_HOME environment variable to the JDK_HOME-->
+  <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+
   <groupId>cla</groupId>
   <artifactId>enum-impl-patterns</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -32,7 +36,18 @@
             <configuration>
               <source>1.8</source>
               <target>1.8</target>
+              <verbose>true</verbose>
+              <fork>true</fork>
+              <executable>${env.JAVA_1_8_HOME}/bin/javac</executable>
             </configuration>
+          </plugin>
+
+          <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <configuration>
+              <jvm>${env.JAVA_1_8_HOME}/bin/java</jvm>
+              <failIfNoTests>true</failIfNoTests>
+              </configuration>
           </plugin>
         </plugins>
       </build>
