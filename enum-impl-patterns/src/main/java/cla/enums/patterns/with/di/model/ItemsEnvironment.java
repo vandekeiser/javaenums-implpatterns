@@ -1,4 +1,4 @@
-package cla.enums.patterns.with.polymorphism.and.di.model;
+package cla.enums.patterns.with.di.model;
 
 
 public interface ItemsEnvironment {

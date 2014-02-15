@@ -1,9 +1,8 @@
 package cla.enums.patterns.strategy.complete;
 
-import static org.junit.Assert.*;
-import static cla.enums.patterns.strategy.complete.BinaryOperation.ArithmeticOperation.*;
-
 import org.junit.Test;
+import static cla.enums.patterns.strategy.complete.BinaryOperation.ArithmeticOperation.*;
+import static org.junit.Assert.assertEquals;
 
 public class BinaryOperationTest {
 

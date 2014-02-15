@@ -1,9 +1,8 @@
 package cla.enums.patterns.with.values.zero;
 
-import static org.junit.Assert.*;
-
 import org.junit.Ignore;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author CLA

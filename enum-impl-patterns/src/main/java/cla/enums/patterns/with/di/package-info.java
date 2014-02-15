@@ -6,4 +6,4 @@
  * <p>Concrètement, le package métier com.toto.modele contient XXXEntity et XXXHelper/XXXServices/XXXEnvironment,
  * et le package technique com.toto.services contient XXXServicesImpl (par ex. un bean Spring transactionnel).</p>
  * */
-package cla.enums.patterns.with.polymorphism.and.di;
+package cla.enums.patterns.with.di;

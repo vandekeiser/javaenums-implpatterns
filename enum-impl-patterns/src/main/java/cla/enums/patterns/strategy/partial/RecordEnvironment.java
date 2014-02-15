@@ -1,5 +1,9 @@
 package cla.enums.patterns.strategy.partial;
 
+/**
+ * Abstraction de l'environnement dont dépend RecordDeletionStrategy.
+ * Cette classe fait partie du même package, alors que l'implémentation réside dans le package <tt>se</tt>
+ * */
 public interface RecordEnvironment {
 
 	public interface PhysicalDeleter {

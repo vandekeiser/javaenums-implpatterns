@@ -1,22 +1,17 @@
 package cla.enums.patterns.strategy.partial;
 
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.DEFECTIVE;
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.NOOP;
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.SLEEPING_DEEPLY;
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.UNSUPPORTIVE;
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.WellKnownImpls.LOGICAL_DELETION;
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.WellKnownImpls.PHYSICAL_DELETION;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.*;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.WellKnownImpls.LOGICAL_DELETION;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.WellKnownImpls.PHYSICAL_DELETION;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class RecordDeletionStrategyTest {
 

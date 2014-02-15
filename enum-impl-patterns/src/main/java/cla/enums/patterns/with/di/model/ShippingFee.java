@@ -1,4 +1,4 @@
-package cla.enums.patterns.with.polymorphism.and.di.model;
+package cla.enums.patterns.with.di.model;
 
 
 
@@ -18,7 +18,7 @@ public enum ShippingFee {
 	
 	;
 	
-	public double shippingFee(double weight, ItemsEnvironment env) {
+	public double shippingFee(double weight, cla.enums.patterns.with.di.model.ItemsEnvironment env) {
 		double basePrice = env.basePriceServices().basePrice(weight);
 		return basePrice * multiplier();
 	}

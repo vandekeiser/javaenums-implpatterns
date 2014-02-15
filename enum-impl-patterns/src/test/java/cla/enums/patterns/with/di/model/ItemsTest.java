@@ -1,12 +1,10 @@
-package cla.enums.patterns.with.polymorphism.and.di.model;
+package cla.enums.patterns.with.di.model;
 
-import static org.junit.Assert.assertEquals;
-
+import cla.enums.patterns.with.di.services.ItemEnvironmentBean;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import cla.enums.patterns.with.polymorphism.and.di.services.ItemEnvironmentBean;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Model layer test.
