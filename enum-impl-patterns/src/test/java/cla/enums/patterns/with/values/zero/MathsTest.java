@@ -28,7 +28,7 @@ public class MathsTest {
 	 * (c'est difficile parce que les enums sont bien blindées).
 	 */
 	@Ignore //TODO
-	@Test public void impossibleNestPasFrancais() {
+	@Test public void impossible() {
 //		assertEquals(
 //				999D, 
 //				new Maths().toto(),
