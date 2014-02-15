@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class ItemsTest {
 
 	//@Inject bean from technical services layer 
-	ItemEnvironmentBean env = new ItemEnvironmentBean();
+	private ItemEnvironmentBean env;
 	
 	//SUT = Model layer object
 	private Bill bill;
@@ -22,7 +22,7 @@ public class ItemsTest {
 		assertEquals(
 			9.0D, //weight=2, base price=3*weight=6, total=6*1.5=9 
 			bill.computeTotalPrice(this.env),
-			0.0D //pr�cision OK pour les petits entiers
+			0.0D //précision OK pour les petits entiers
 		);
 	}
 
@@ -35,9 +35,11 @@ public class ItemsTest {
 		bill.shipping = ShippingFee.HEAVY;
 		
 		//2. Simule l'injection de dépendance
+        env = new ItemEnvironmentBean();
 		env.basePrices = (double weight) -> 3*weight;
 	}
 	@After public void teardown() {
-		this.bill = null;
+        this.env = null;
+        this.bill = null;
 	}
 }
