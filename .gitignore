@@ -1,0 +1,7 @@
+.classpath
+.project
+.settings/*
+bin/*
+*.7z
+.idea/*
+*.iml
