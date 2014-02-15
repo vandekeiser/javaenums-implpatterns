@@ -18,13 +18,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import cla.enums.patterns.strategy.partial.Record;
-import cla.enums.patterns.strategy.partial.RecordEnv;
-
 public class RecordDeletionStrategyTest {
 
 	private Record r;
-	private RecordEnv env;
+	private RecordEnvironment env;
 	
 	//Degenerate impls
 	@Test public void noop() {
@@ -71,7 +68,7 @@ public class RecordDeletionStrategyTest {
 		r.physicallyDeleted = false;
 		r.logicallyDeleted = false;
 		
-		env = new RecordEnv(){};//default impl
+		env = new RecordEnvironment(){};//default impl
 	}
 	@After public void teardown() {
 		r = null;

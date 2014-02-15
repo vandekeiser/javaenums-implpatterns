@@ -1,6 +1,6 @@
 package cla.enums.patterns.strategy.partial;
 
-public interface RecordEnv {
+public interface RecordEnvironment {
 
 	public interface PhysicalDeleter {
 		void deletePhysically(Record r);

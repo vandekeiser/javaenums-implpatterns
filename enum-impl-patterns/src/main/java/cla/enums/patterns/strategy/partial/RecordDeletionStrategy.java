@@ -10,7 +10,7 @@ package cla.enums.patterns.strategy.partial;
  */
 public interface RecordDeletionStrategy {
 	
-	void deleteRecord(Record r, RecordEnv env);
+	void deleteRecord(Record r, RecordEnvironment env);
 	
 	/**
 	 * Les enums dégénérées sont une variante du pattern,
@@ -23,16 +23,16 @@ public interface RecordDeletionStrategy {
 		 * Null object/dummy. 
 		 */
 		NOOP {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				;
 			}
 		},
 
 		/**
-		 * For optional operations.
+		 * Pattern used for optional operations.
 		 */
 		UNSUPPORTIVE {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				throw new UnsupportedOperationException();
 			}
 		},
@@ -41,7 +41,7 @@ public interface RecordDeletionStrategy {
 		 * Simulates failure.
 		 */
 		DEFECTIVE {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				throw new RuntimeException();
 			}
 		},
@@ -51,7 +51,7 @@ public interface RecordDeletionStrategy {
 		 * by not permitting exit otherwise. 
 		 */
 		SLEEPING_DEEPLY {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				while(true)
 				try {
 					Thread.sleep(Long.MAX_VALUE);
@@ -74,7 +74,7 @@ public interface RecordDeletionStrategy {
 		/**
 		 */
 		PHYSICAL_DELETION {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				env.physicalDeleter().deletePhysically(r);
 			}
 		},
@@ -82,7 +82,7 @@ public interface RecordDeletionStrategy {
 		/**
 		 */
 		LOGICAL_DELETION {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				env.logicalDeleter().deleteLogically(r);
 			}
 		},
