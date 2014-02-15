@@ -2,8 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
-  <!--You need to set the JAVA_1_8_HOME environment variable to the JDK_HOME-->
+  <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-!!!!!!!!-->
+  <!--You need to set the JAVA_1_8_HOME environment variable to the JDK_HOME.-->
+  <!--That's because most of you probably don't have their JAVA_HOME         -->
+  <!-- pointing to JDK 8 yet, so it's easier to add a new env variable       -->
   <!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
 
   <groupId>cla</groupId>
@@ -46,6 +48,7 @@
               <artifactId>maven-surefire-plugin</artifactId>
               <configuration>
               <jvm>${env.JAVA_1_8_HOME}/bin/java</jvm>
+              <!--if launching surefire generates incompatible class version error, tests haven't been launched yet (0 tests). We want to make the build fail in this case.-->
               <failIfNoTests>true</failIfNoTests>
               </configuration>
           </plugin>
