@@ -1,7 +1,7 @@
 package cla.enums.patterns.with.di.services;
 
 /**
- * C'est le package technique/frontière qui dépend du package technique (inversion de dépendance).
+ * C'est le package technique/frontière qui dépend du package métier (inversion de dépendance).
  * */
 public class ItemEnvironmentBean implements cla.enums.patterns.with.di.model.ItemsEnvironment {
 
