@@ -3,5 +3,6 @@
 .settings/*
 bin/*
 *.7z
-.idea/*
+*/.idea/*
+*/target/*
 *.iml
