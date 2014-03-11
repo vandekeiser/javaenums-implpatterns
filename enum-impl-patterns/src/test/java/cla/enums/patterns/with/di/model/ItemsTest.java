@@ -32,7 +32,7 @@ public class ItemsTest {
 		this.bill = new Bill();
 		bill.item = new Item();
 		bill.item.weight = 2.0D;
-		bill.shipping = ShippingFee.HEAVY;
+		bill.weight = ClientType.SILVER;
 		
 		//2. Simule l'injection de dépendance
         env = new ItemEnvironmentBean();

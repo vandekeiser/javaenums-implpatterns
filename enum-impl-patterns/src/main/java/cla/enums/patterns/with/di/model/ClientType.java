@@ -2,15 +2,15 @@ package cla.enums.patterns.with.di.model;
 
 
 
-public enum ShippingFee {
+public enum ClientType {
 
-	LIGHT {
+	GOLD {
 		@Override public double multiplier() {
 			return 1.0D;
 		}
 	},
 	
-	HEAVY {
+	SILVER {
 		@Override public double multiplier() {
 			return 1.5D;
 		}

@@ -7,10 +7,10 @@ public class Bill {
 	Item item;
 	
 	//@Field, les enums sont persistees sans problème par JPA/...
-	ShippingFee shipping;
+	ClientType weight;
 	
 	public double computeTotalPrice(ItemsEnvironment env) {
-		return this.shipping.shippingFee(
+		return this.weight.shippingFee(
 			this.item.weight, 
 			env
 		);
