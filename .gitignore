@@ -1,8 +1,9 @@
 .classpath
 .project
-.settings/*
+*/.settings/*
 bin/*
 *.7z
 */.idea/*
 */target/*
 *.iml
+.metadata/*
