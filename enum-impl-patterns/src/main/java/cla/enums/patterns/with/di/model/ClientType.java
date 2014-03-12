@@ -1,27 +1,35 @@
 package cla.enums.patterns.with.di.model;
 
-
-
+/**
+ * Comme expliqué dans <tt>Bill</tt>, en Java on utilise souvent l'inversion de 
+ * dépendance dans des enums polymorphiques et en particulier celles dont 
+ * les constantes représentent les implémentations d'une Stratégie (GOF)
+ * Ici shippingFeeForWeight dépend de l'abstraction <tt>ItemsEnvironment</tt> qui est dans 
+ * le package <tt>model</tt>   
+ * */
 public enum ClientType {
 
 	GOLD {
-		@Override public double multiplier() {
-			return 1.0D;
+		@Override public long feeMultiplier() {
+			return 1;
 		}
 	},
 	
 	SILVER {
-		@Override public double multiplier() {
-			return 1.5D;
+		@Override public long feeMultiplier() {
+			return 2;
 		}
 	},
 	
 	;
 	
-	public double shippingFee(double weight, cla.enums.patterns.with.di.model.ItemsEnvironment env) {
-		double basePrice = env.basePriceServices().basePrice(weight);
-		return basePrice * multiplier();
+	public long shippingFeeForWeight(double weight, ItemsEnvironment env) {
+		//C'est ici qu'on a besoin d'un composant "service", 
+		// mais on pourrait aussi dépendre d'un Repository, ...
+		//Cette nécessité se manifeste souvent quand on veut faire du domain-driven design.
+		long baseFee = env.feeServices().baseShippingFee(weight);
+		return baseFee * feeMultiplier();
 	}
 
-	protected abstract double multiplier();
+	protected abstract long feeMultiplier();
 }

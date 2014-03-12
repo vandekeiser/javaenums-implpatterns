@@ -30,13 +30,13 @@ public class ItemsTest {
 	@Before public void setup() {
 		//1. Create bill
 		this.bill = new Bill();
-		bill.item = new Item();
-		bill.item.weight = 2.0D;
-		bill.weight = ClientType.SILVER;
+		bill.billedItem = new Item();
+		bill.billedItem.weight = 2.0D;
+		bill.billedClientType = ClientType.SILVER;
 		
 		//2. Simule l'injection de dépendance
         env = new ItemEnvironmentBean();
-		env.basePrices = (double weight) -> 3*weight;
+		env.basePrices = (double weight) -> 3*Math.round(weight);
 	}
 	@After public void teardown() {
         this.env = null;
