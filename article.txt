@@ -14,17 +14,29 @@ Contrairement aux enums value types, les type-safe enums présentent les avantage
 
 1/a/ L'enum singleton
 Cf. Effective java, le singleton naïf:
-public class NaiveSingleton {	
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/**
+ * L'implémentation naïve du singleton offre moins de garanties que l'enum,
+ * surtout pour un type sérialisable.
+ */
+public class NaiveSingleton implements Serializable {
+	
 	private NaiveSingleton() {}
+	
 	public static final NaiveSingleton instance = new NaiveSingleton(); 
+	
 }
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 maintient la garantie d'instance unique en empêchant l'instanciation par constructeur depuis une autre classe.
 Cependant, il n'est pas préservé contre les instanciations par les mécanismes extra-linguistiques: invocation du constructeur par réflexion, copie par sérialisation (s'il implémente Serializable), clone (peu vraisemblable certes).
 
-Les enums sont un singleton idéal car la classe générée par javac interdit ces tentatives:
-
+Les enums sont un singleton idéal car le code générée par javac interdit ces tentatives:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 /**
- * Un singleton stateless.
+ * Un singleton stateless. 
+ * Java Puzzlers suggère d'utiliser une enum pour être sûr à moindre frais
+ * que cette enum en est vraiment une.
  */
 public enum Factory {
 	
@@ -34,11 +46,20 @@ public enum Factory {
 		return new Object();
 	}
 }
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 1/b/ L'enum singleton stateful
 Ce pattern est parfois découragé dans la littérature mais sans trop dire pourquoi?
 Effective Java encourage l'implémentation des enums par singleton, mais sans mentionner la distinction stateless/stateful.
-
+Avez-vous une idée sur la question?
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/**
+ * Un singleton stateful.
+ * Ce pattern est parfois découragé dans la littérature mais sans trop dire pourquoi?
+ * Effective Java et Java puzzlers encouragent l'implémentation du singleton par enum, 
+ * mais sans mentionner la distinction stateless/stateful.
+ */
 public enum Repository {
 	
 	instance;
@@ -47,11 +68,12 @@ public enum Repository {
 	
 	public Object forKey(String key) {
 		Object obj = new Object();
-		repo.put(key, obj);
+		repo.putIfAbsent(key, obj);
 		return obj;
 	}
 	
 }
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 2/ L'enum "static class"
 
@@ -59,10 +81,10 @@ Java n'a pas de "top-level static class" au sens de C# (classes dont le compilat
 
 L'enum sans valeurs est un pattern d'implémentation java qui émule ces classes (qu'on pourrait facilement avoir en java dans un "coin 2" via un changement de javac,
 mais les concepteurs de Java doivent avoir peur d'ajouter à la confusion qui entoure déjà les nested classes statiques VS inner classes VS static class en C#).  
-
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 public enum Maths {
 	
-	;//Une enum commence toujours par la déclaration de ses instances (les "enum constants"); 
+	;//Une enum commence toujours par la déclaration de ses instances (les "enum constants");
 	 //ici il n'y en a aucune mais le bloc est quand même obligatoire.
 	
 	public static double PI = 4*java.lang.Math.atan(1.0D);//tan(pi/4)=1 cf. le cercle trigonométrique
@@ -75,13 +97,43 @@ public enum Maths {
 	public double toto() {return 999D;}
 }
 
+public class MathsTest {
+	/**
+	 * <p>Quand un test passe au vert alors qu'on n'a encore rien fait c'est que le test ne teste rien.</p>
+	 * <p>C'est pour ça qu'il faut d'abord obtenir le rouge avant d'implémenter.</p>
+	 * <p>Ici le test est trompeur, voyez-vous pourquoi?</p>
+	 */
+	@Test public void cosinusAngleDroitEgaleZero() {
+		assertEquals(
+				0D, 
+				Maths.cos(Maths.PI/2),
+				0D
+		);
+	}
+	
+	/**
+	 * Pas possible d'invoquer la méthode non-statique <code>toto()</code>
+	 * (c'est difficile parce que les enums sont bien blindées).
+	 */
+	@Ignore
+	@Test public void impossible() {
+//		assertEquals(
+//				999D, 
+//				new Maths().toto(),
+//				0D
+//		);
+	}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 L'émulation n'est pas complète car on peut quand même écrire une méthode non-statique, mais au runtime on est sûr de ne pas invoquer cette méthode. 
 Dans un sens, la garantie est même supérieure au pattern habituel: 
-
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 private Math(){throw new UnsupportedOperationException();}
-  
-qui permet de rentrer dans le constructeur (même si c'est pour crasher tt de suite), et qui est un peu plus verbeux.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+, qui permet de rentrer dans le constructeur (même si c'est pour crasher tt de suite), et qui est un peu plus verbeux.
 
 
 3/ Enums polymorphiques
@@ -90,10 +142,9 @@ Rentrons dans le vif du sujet avec ce pattern extrêmement puissant.
 a/ Variation: implémentation complète
 
 Dans cette variation, il n'existe pas d'implémentations non-enums.
-Si on a besoin d'une autre implémentation, on ajoute une constante à l'enum, qui contient toutes les implémentations intéressantes de la stratégie connues/intéressantes (pour l'instant). 
-Les implémentations enum constants évitent la multiplication de singletons.
-Ces enums sont typiquement stateless
-
+Si on a besoin d'une autre implémentation, on ajoute une constante à l'enum, qui contient toutes les implémentations de la stratégie possibles/connues/intéressantes (pour l'instant).
+Les implémentations enum constants évitent la multiplication de singletons. Ces enums sont typiquement stateless.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 package cla.enums.patterns.strategy.complete;
 
 public interface BinaryOperation {
@@ -138,26 +189,96 @@ public interface BinaryOperation {
 
 }
 
+public class BinaryOperationTest {
+
+	@Test public void plus() {
+		assertEquals(
+				3D, 
+				PLUS.apply(1D, 2D),
+				0D
+		);
+	}
+
+	@Test public void minus() {
+		assertEquals(
+				-1D, 
+				MINUS.apply(1D, 2D),
+				0D
+		);
+	}
+
+	@Test public void times() {
+		assertEquals(
+				6D, 
+				TIMES.apply(2D, 3D),
+				0D
+		);
+	}
+
+	@Test public void dividedBy() {
+		assertEquals(
+				2D, 
+				DIVIDED_BY.apply(6D, 3D),
+				0D
+		);
+	}
+
+	@Test public void printPlus() {
+		assertEquals(
+				"+", 
+				PLUS.toString()
+		);
+	}
+
+	@Test public void printMinus() {
+		assertEquals(
+				"-", 
+				MINUS.toString()
+		);
+	}
+
+	@Test public void printTimes() {
+		assertEquals(
+				"*", 
+				TIMES.toString()
+		);
+	}
+
+	@Test public void printDividedBy() {
+		assertEquals(
+				"/", 
+				DIVIDED_BY.toString()
+		);
+	}
+}	
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 b/ Variation: implémentation partielle
 
 Dans ce pattern, il existe d'autres implémentations, non-enums.
 Les implémentations enum constants évitent la multiplication de singletons.
-Ces enums sont typiquement stateless, alors que les implémentations non-enums ne le sont pas forcément (ex. une implémentation cachante).
+Ces enums sont typiquement stateless, alors que les implémentations non-enums ne le sont pas forcément (ex. une implémentation avec cache).
 
 Etant données les deux classes:
 
--b/1/
-métier
+1: métier
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/**
+ * Une entité du domaine
+ */
 public class Record {
+	
 	public boolean  logicallyDeleted; 
-	//Contrived example; 
-	//in reality physical deletion means being removed from a repository. 
-	public boolean physicallyDeleted; 
+	
+	//Example peu réaliste mais simple, car ce n'est pas le sujet; 
+	//dans la réalité la suppression physique ne serait sûrement pas implémentée par un flag.
+	public boolean physicallyDeleted;
+	
 }
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-et:
--b/2/
-d'infrastructure:
+et 2: d'infrastructure:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 public interface RecordEnv {
 
 	public interface PhysicalDeleter {
@@ -175,18 +296,22 @@ public interface RecordEnv {
 	}
 	
 } 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
--b/3/
-Dans ce contexte, on peut avantageusement représenter certaines stratégies d'effacement d'une ligne par des enums:
-
+3: Dans ce contexte, on peut avantageusement représenter certaines stratégies d'effacement d'une ligne par des enums:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 public interface RecordDeletionStrategy {
 	
-	void deleteRecord(Record r, RecordEnv env);
+	/**
+	 * L'unique méthode, ce qui est le plus fréquent pour une stratégie
+	 */
+	void deleteRecord(Record r, RecordEnvironment env);
 	
 	/**
-	 * Les enums dégénérées sont une variante du pattern, 
-	 * dans laquelle les enum constants représentent des implémentations non-opérationnelles, 
+	 * Les "enums dégénérées" sont une sous-variante du pattern,
+	 * dans laquelle les enum constants représentent des implémentations non-opérationnelles,
 	 * utilisables comme Null Object (Fowler, POEA) ou comme fake object de test.
+	 * Quelques exemples de ces fakes objects:
 	 */
 	public enum DegenerateImpls implements RecordDeletionStrategy {
 		
@@ -194,41 +319,26 @@ public interface RecordDeletionStrategy {
 		 * Null object/dummy. 
 		 */
 		NOOP {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				;
 			}
 		},
 
 		/**
-		 * For optional operations.
+		 * Implémentation par défaut d'une opération optionnelle (cf. le Collections framework du JDK).
 		 */
 		UNSUPPORTIVE {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				throw new UnsupportedOperationException();
 			}
 		},
 		
 		/**
-		 * Simulates failure.
+		 * Simule un problème, pour les tests de gestion d'erreur par exemple.
 		 */
 		DEFECTIVE {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				throw new RuntimeException();
-			}
-		},
-		
-		/**
-		 * Enables testing the executing thread's daemon status 
-		 * by not permitting exit otherwise. 
-		 */
-		SLEEPING_DEEPLY {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
-				while(true)
-				try {
-					Thread.sleep(Long.MAX_VALUE);
-				} catch (InterruptedException e) {
-					//Ignore royally
-				}
 			}
 		},
 		
@@ -236,24 +346,26 @@ public interface RecordDeletionStrategy {
 	}
 	
 	/**
-	 * Les implémentation connues sont une variante du pattern, 
-	 * où les enum constants représentent des implémentations opérationnelles fournies par l'API, 
-	 * qui peuvent être complétées par des implémentations custom.
+	 * Les "implémentation connues" sont une autre sous-variante du pattern,
+	 * où les enum constants représentent des implémentations opérationnelles fournies par l'API,
+	 * mais qui peuvent être complétées par des implémentations de l'application.
 	 */
 	public enum WellKnownImpls implements RecordDeletionStrategy {
 		
 		/**
+		 * Fait un delete en BD (par ex.)
 		 */
 		PHYSICAL_DELETION {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				env.physicalDeleter().deletePhysically(r);
 			}
 		},
 		
 		/**
+		 * Met le flag 'DELETED' à true 
 		 */
 		LOGICAL_DELETION {
-			@Override public void deleteRecord(Record r, RecordEnv env) {
+			@Override public void deleteRecord(Record r, RecordEnvironment env) {
 				env.logicalDeleter().deleteLogically(r);
 			}
 		},
@@ -261,6 +373,7 @@ public interface RecordDeletionStrategy {
 		;
 	}
 }
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 c/ Variation: enums du domaine avec inversion de dépendance
 
@@ -278,93 +391,245 @@ L'inversion de dépendance dans la couche métier permet de contourner cette obsta
 Concrètement, le package métier com.toto.modele contient XXXEntity et XXXHelper/XXXServices/XXXEnvironment (où XXX représente des trains, des entrepôts de carottes, ...),
 et le package technique com.toto.services contient XXXServicesImpl (par ex. un bean Spring transactionnel).
 
--c/1/
-Prenons le cas de 2 entités du modèle du domaine:
-
+1: Prenons le cas de 2 entités du modèle du domaine:
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+package cla.enums.patterns.with.di.model;
+/**
+ * Une entité du domaine.
+ * Ici son seul intérêt dans l'exemple est d'être agrégée par <tt>Bill</tt>,
+ * qui lui colocalise état et logique métier. 
+ */
 //@Entity
 public class Item {
+
+	public long priceWithoutShipping;
+	
 	public double weight;
+
 }
 
-//@Entity
-public class Bill {	
+/**
+ * Une entité du domaine.
+ * <p>
+ * Elle colocalise état et logique métier,
+ * contrairement à l'antipattern fréquent des "entités étiques" (squelettiques).
+ * Le livre "domain-driven design" décrit cet l'antipattern dans lequel
+ * les entités ressemblent à des structs sans logique métier,
+ * qui est alors principalement contenue dans des "transaction scripts"
+ * (typiquement de longues méthodes procédurales dans un composant "frontière",
+ * comme un web service, un EJB remote, un bean Spring transactionnel, ...)
+ * </p>
+ * <p>
+ * L'inconvénient principal de cet antipattern est que comme la couche objet n'a pas d'épaisseur,
+ * on perd tous les avantages de la modélisation objet.
+ * </p>
+ * <p>
+ * Le livre explique en outre que la fréquence de cet antipattern s'explique 
+ * par une difficulté technique: la plupart du temps, pour réaliser une logique métier non-triviale,
+ * les objets du domaine auraient besoin de dépendre de composants techniques ou frontière
+ * (frontière au sens de boundary du pattern EE entity/control/boundary).
+ * Ceci serait problématique, car d'autre part les composants frontière dépendent toujours 
+ * des entités du domaine; on aboutirait alors à une dépendance croisée entre les packages
+ * <tt>cla.enums.patterns.with.polymorphism.and.di.model</tt> et 
+ * <tt>cla.enums.patterns.with.polymorphism.and.di.services</tt>.
+ * La façon la plus simple mais pas la meilleure de s'affranchir de cette difficulté
+ * est de mettre toute la logique métier dans les composants frontière,
+ * et on arrive alors à l'antipattern décrit.     
+ * </p>
+ * <p>
+ * Une solution plus satisfaisante est d'utiliser l'inversion de dépendance, 
+ * qui consiste à remplacer la dépendance entre deux packages par une dépendance
+ * des deux envers une abstraction commune, contenue dans le package métier
+ * (ici cette abstraction est ItemsEnvironment).
+ * </p>
+ * <p>
+ * En particulier en Java, on est souvent amené à utiliser cette technique 
+ * avec des enums polymorphiques dont les constantes représentent les 
+ * implémentations d'une Stratégie (GOF), ici ClientType.  
+ * </p>       
+ */
+//@Entity //Les entités JPA sont un exemple typique d'entités du domaine. 
+public class Bill {
+	
 	//@Field
-	Item item;
+	Item billedItem;
 	
-	//@Field, les enums sont persistees sans problème par JPA/...
-	ShippingFee shipping;
+	//@Field, les enums sont persistées sans problème par JPA 
+	// (de prference par leur name et non leur ordinal)
+	ClientType billedClientType;
 	
-	public double computeTotalPrice(ItemsEnvironment env) {
-		return this.shipping.shippingFee(
-			this.item.weight, 
+	//Implémente une logique métier non triviale,
+	// mais pour ce faire à besoin d'un service externe technique/frontière.
+	// Ici la logique métier est localisée dans l'enum "Stratégie" ClientType.
+	//(Rien à voir, mais on ne fait jamais de calcul exacts (monétaires ou autre) avec des types binaires,
+	// ici on représente la quantité monétaire en centimes (de quelle monnaie??) car ce n'est pas le sujet, 
+	// mais une solution plus réaliste est d'utiliser le pattern Quantité)
+	public long computeTotalPrice(ItemsEnvironment env) {
+		return  billedItem.priceWithoutShipping + this.billedClientType.shippingFeeForWeight(
+			this.billedItem.weight, 
 			env
 		);
 	}
 }
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 L'entité Bill implémente computeTotalPrice, car cela permet (conformément au DDD et au principe d'attribution de responsabilité "expert en information") d'attribuer la responsabilité de produire une information agrégée à l'entité qui contient l'information détaillée.
 Mais ce calcul nécessite une dépendance envers un service technique (DAO, lookup, ...).
 Au lieu de renoncer au DDD et d'implémenter computeTotalPrice sous forme de code procédural dans un service frontière, on introduit une abstraction de ces services. Cette abstraction doit avoir un sens pour le domaine, et doit le moins possible évoquer une préoccupation technique (si possible pas du tout, pour éviter d'introduire une "dépendance croisée conceptuelle")
 
--c/2/
-L'abstraction de l'environnement/du contexte dans lequel baigne l'entité à l'allure suivante: elle contient typiquement une méthode de service, ou un(ce cas)/plusieurs getters d'interfaces de services.
+2: Les enums étant supportées au niveau langage, elles sont faciles à sérialiser/persister en BD ou autre. 
+On peut donc représenter à moindre frais le lien d'une entité du domaine vers une stratégie.
+Le besoin d'inversion de dépendance est localisé dans cette enum.
 
-public interface ItemsEnvironment {
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+package cla.enums.patterns.with.di.model;
 
-	BasePriceServices basePriceServices();
+/**
+ * Comme expliqué dans <tt>Bill</tt>, en Java on utilise souvent l'inversion de 
+ * dépendance dans des enums polymorphiques et en particulier celles dont 
+ * les constantes représentent les implémentations d'une Stratégie (GOF)
+ * Ici shippingFeeForWeight dépend de l'abstraction <tt>ItemsEnvironment</tt> qui est dans 
+ * le package <tt>model</tt>   
+ * */
+public enum ClientType {
 
-	public interface BasePriceServices {
-		double basePrice(double weight);
-	}
-}
-
-
-
--c/2/
-Les enums étant supportées au niveau langage, elles sont faciles à sérialiser/persister en BD. 
-On peut donc persister à moindre frais le lien d'une entité du domaine vers une stratégie.
-Ici ShippingFee n'implémente pas d'interface mais implémente un méthode template:
-
-public enum ShippingFee {
-
-	LIGHT {
-		@Override public double multiplier() {
-			return 1.0D;
+	GOLD {
+		@Override public long feeMultiplier() {
+			return 1;
 		}
 	},
 	
-	HEAVY {
-		@Override public double multiplier() {
-			return 1.5D;
+	SILVER {
+		@Override public long feeMultiplier() {
+			return 2;
 		}
 	},
 	
 	;
 	
-	public double shippingFee(double weight, ItemsEnvironment env) {
-		double basePrice = env.basePriceServices().basePrice(weight);
-		return basePrice * multiplier();
+	public long shippingFeeForWeight(double weight, ItemsEnvironment env) {
+		//C'est ici qu'on a besoin d'un composant "service", 
+		// mais on pourrait aussi dépendre d'un Repository, ...
+		//Cette nécessité se manifeste souvent quand on veut faire du domain-driven design.
+		long baseFee = env.fees().baseShippingFee(weight);
+		return baseFee * feeMultiplier();
 	}
 
-	protected abstract double multiplier();
+	protected abstract long feeMultiplier();
 }
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+3: L'abstraction de l'environnement/du contexte dans lequel baigne l'entité à l'allure suivante: elle contient typiquement une méthode de service, 
+ou (comme ici) un/plusieurs getters d'interfaces de services.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+package cla.enums.patterns.with.di.model;
 
 
--c/3/
-L'implémentation de l'environnement est contenue dans un package de service/frontière. La dépendance de packages est monodirectionnelle (service/frontière dépend de domaine) 
+/**
+ * L'abstraction commune dont dépendent: 
+ * <ul>
+ * <li>les entités du domaine et en particulier l'enum <tt>ClientType</tt>
+ * <li>le bean d'implémentation technique du package <tt>services</tt>, <tt>ItemsEnvironmentBean</tt>
+ * </ul>
+ */
+public interface ItemsEnvironment {
 
-public class ItemEnvironmentBean implements ItemsEnvironment {
+	/**
+	 * Ici l'environnement ne comporte qu'1 service technique. 
+	 * En réalité l'interface environnement pourrait exposer différents types de 
+	 * composants stateless ou stateful sous une forme abstraite pour la couche métier.
+	 * FeeServices représente le frais de port "de base" avant application 
+	 * d'un multiplicateur spécifique au type de client SILVER/GOLD.
+	 */
+	FeeServices fees();
 
+	/**
+	 * L'abstraction d'un service technique (par exemple un WS)
+	 */
+	public interface FeeServices {
+		long baseShippingFee(double weight);
+	}
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+4: L'implémentation de l'environnement est contenue dans un package de service/frontière. La dépendance de packages est monodirectionnelle (service/frontière dépend de domaine) 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+package cla.enums.patterns.with.di.services;
+
+/**
+ * Bean Spring/EE dont ne veulent surtout pas dépendre les entités du domaine.
+ * Elles ne dépendent que de ItemsEnvironment qui fait bien partie du package model.
+ * */
+public class ItemEnvironmentBean implements cla.enums.patterns.with.di.model.ItemsEnvironment {
+
+	/**
+	 * Ici le côté technique de la classe d'implémentation est illustré par une dépendance 
+	 * à un service supposément technique, comme un WS remote par ex. 
+	 * On le met public pour simuler un @Inject de framework à peu de frais depuis ItemsTest#setup().  
+	 * */
 	//@Inject
-	public BasePriceServices basePrices = (double weight) -> 0D; 
+	public FeeServices feeServices;
 	
-	@Override public BasePriceServices basePriceServices() {
-		return basePrices;
+	@Override public FeeServices fees() {
+		return feeServices;
 	}
 	
 }
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
+5: Le test
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+package cla.enums.patterns.with.di.model;
+
+import cla.enums.patterns.with.di.services.ItemEnvironmentBean;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+/**
+ * Tests unitaires de la couche métier.
+ */
+public class ItemsTest {
+
+	//@Inject bean technique 
+	private ItemEnvironmentBean env;
+	
+	//Le SUT
+	private Bill bill;
+	
+	@Test public void totalPriceTakesBasePriceAndShippingFeeIntoAccount() {
+		assertEquals(
+			19.0D, //7 + (3*2)*2 
+			bill.computeTotalPrice(this.env),
+			0.0D //précision OK pour les petits entiers
+		);
+	}
+
+	//---setup/teardown
+	@Before public void setup() {
+		//1. Create bill
+		this.bill = new Bill();
+		bill.billedItem = new Item();
+		bill.billedItem.priceWithoutShipping = 7L;
+		bill.billedItem.weight = 2.0D;
+		bill.billedClientType = ClientType.SILVER;//*2
+		
+		//2. Simule l'injection de dépendance
+        env = new ItemEnvironmentBean();
+		env.feeServices = (double weight) -> 3*Math.round(weight);//3*2=6
+	}
+	@After public void teardown() {
+        this.env = null;
+        this.bill = null;
+	}
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Le code est téléchargeable à l'adresse...
