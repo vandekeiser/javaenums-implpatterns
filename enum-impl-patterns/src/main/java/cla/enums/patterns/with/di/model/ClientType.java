@@ -27,7 +27,7 @@ public enum ClientType {
 		//C'est ici qu'on a besoin d'un composant "service", 
 		// mais on pourrait aussi dépendre d'un Repository, ...
 		//Cette nécessité se manifeste souvent quand on veut faire du domain-driven design.
-		long baseFee = env.feeServices().baseShippingFee(weight);
+		long baseFee = env.fees().baseShippingFee(weight);
 		return baseFee * feeMultiplier();
 	}
 

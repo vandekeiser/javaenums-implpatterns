@@ -57,7 +57,7 @@ public class Bill {
 	// ici on représente la quantité monétaire en centimes (de quelle monnaie??) car ce n'est pas le sujet, 
 	// mais une solution plus réaliste est d'utiliser le pattern Quantité)
 	public long computeTotalPrice(ItemsEnvironment env) {
-		return  billedItem.basePrice + this.billedClientType.shippingFeeForWeight(
+		return  billedItem.priceWithoutShipping + this.billedClientType.shippingFeeForWeight(
 			this.billedItem.weight, 
 			env
 		);

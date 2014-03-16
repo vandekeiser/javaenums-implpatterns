@@ -17,9 +17,6 @@ package cla.enums.patterns.with.values.zero;
  * private Math(){throw new AssertionError();}
  * </code>
  * qui permet de rentrer dans le constructeur (même si c'est pour crasher tt de suite), et qui est un peu plus verbeux.
- * 
- * @author CLA
- * 
  * */
 public enum Maths {
 	

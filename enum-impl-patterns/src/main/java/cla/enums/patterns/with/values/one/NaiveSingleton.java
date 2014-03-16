@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 
 /**
- * Ce singleton suffit l
+ * L'implémentation naïve du singleton offre moins de garanties que l'enum,
+ * surtout pour un type sérialisable.
  */
 public class NaiveSingleton implements Serializable {
 	

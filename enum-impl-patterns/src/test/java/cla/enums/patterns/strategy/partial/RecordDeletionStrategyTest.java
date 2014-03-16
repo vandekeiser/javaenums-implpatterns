@@ -1,23 +1,23 @@
 package cla.enums.patterns.strategy.partial;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.DEFECTIVE;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.NOOP;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.UNSUPPORTIVE;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.WellKnownImpls.LOGICAL_DELETION;
+import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.WellKnownImpls.PHYSICAL_DELETION;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.DegenerateImpls.*;
-import static cla.enums.patterns.strategy.partial.RecordDeletionStrategy.WellKnownImpls.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class RecordDeletionStrategyTest {
 
 	private Record r;
 	private RecordEnvironment env;
 	
-	//Degenerate impls
+	//Tests de la variante "implémentations dégénérées"
 	@Test public void noop() {
 		NOOP.deleteRecord(r, env);
 		assertFalse(r.logicallyDeleted);
@@ -32,18 +32,7 @@ public class RecordDeletionStrategyTest {
 		UNSUPPORTIVE.deleteRecord(r, env);
 	}
 	
-	@Test public void sleepingDeeply() throws InterruptedException {
-		Runnable uninterruptibleSleep = ()->SLEEPING_DEEPLY.deleteRecord(r, env);
-		ExecutorService exec = Executors.newSingleThreadExecutor();
-		
-		Future<?> taskComplete = exec.submit(uninterruptibleSleep);
-		
-		exec.shutdownNow();
-		exec.awaitTermination(1, TimeUnit.SECONDS);
-		assertFalse(taskComplete.isDone());
-	}
-	
-	//Well known, operational impls
+	//Tests de la variante "implémentations connues"
 	@Test public void logical() {
 		LOGICAL_DELETION.deleteRecord(r, env);
 		assertTrue(r.logicallyDeleted);

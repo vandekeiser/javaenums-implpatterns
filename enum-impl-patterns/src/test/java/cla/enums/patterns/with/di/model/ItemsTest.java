@@ -7,20 +7,19 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Model layer test.
- * @author CLA  
+ * Tests unitaires de la couche métier.
  */
 public class ItemsTest {
 
-	//@Inject bean from technical services layer 
+	//@Inject bean technique 
 	private ItemEnvironmentBean env;
 	
-	//SUT = Model layer object
+	//Le SUT
 	private Bill bill;
 	
 	@Test public void totalPriceTakesBasePriceAndShippingFeeIntoAccount() {
 		assertEquals(
-			9.0D, //weight=2, base price=3*weight=6, total=6*1.5=9 
+			19.0D, //7 + (3*2)*2 
 			bill.computeTotalPrice(this.env),
 			0.0D //précision OK pour les petits entiers
 		);
@@ -31,12 +30,13 @@ public class ItemsTest {
 		//1. Create bill
 		this.bill = new Bill();
 		bill.billedItem = new Item();
+		bill.billedItem.priceWithoutShipping = 7L;
 		bill.billedItem.weight = 2.0D;
-		bill.billedClientType = ClientType.SILVER;
+		bill.billedClientType = ClientType.SILVER;//*2
 		
 		//2. Simule l'injection de dépendance
         env = new ItemEnvironmentBean();
-		env.basePrices = (double weight) -> 3*Math.round(weight);
+		env.feeServices = (double weight) -> 3*Math.round(weight);//3*2=6
 	}
 	@After public void teardown() {
         this.env = null;

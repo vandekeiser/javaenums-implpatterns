@@ -1,10 +1,10 @@
 package cla.enums.patterns.strategy.complete;
 
 /**
- * Pattern "Strategy complete enum implementation".
+ * Pattern "Strategy, complete enum implementation".
  * <p>Dans ce pattern, il n'existe pas d'implémentations non-enums.
  * Si on a besoin d'une autre implémentation, on ajoute une constante à l'enum,
- * qui contient toutes les implémentations intéressantes de la stratégie connues/intéressantes (pour l'instant).
+ * qui contient toutes les implémentations de la stratégie possibles/connues/intéressantes (pour l'instant).
  * Les implémentations enum constants évitent la multiplication de singletons.</p>
  * <p>Ces enums sont typiquement stateless</p> 
  */
